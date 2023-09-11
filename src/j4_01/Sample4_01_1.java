@@ -15,7 +15,10 @@ public class Sample4_01_1 {
         String jdbcUrl = "jdbc:postgresql://localhost:5432/sample"; // データベースのURLを設定
         String user = "postgres"; // データベースユーザ名を設定
         String password = "postgres"; // データベースパスワードを設定
+
         Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
         try {
             // JDBCドライバの読み込み
@@ -45,19 +48,45 @@ public class Sample4_01_1 {
                 // テーブルにデータを挿入するSQL文
                 String insertDataSQL = "INSERT INTO employees (first_name, last_name, email) VALUES (?, ?, ?)";
 
-                // PreparedStatementを作成
-                PreparedStatement preparedStatement = connection.prepareStatement(insertDataSQL);
+                // INSERT文でPreparedStatementを作成
+                preparedStatement = connection.prepareStatement(insertDataSQL);
 
                 // サンプルデータを挿入
-                preparedStatement.setString(1, "John");
-                preparedStatement.setString(2, "Doe");
-                preparedStatement.setString(3, "john.doe@example.com");
+                preparedStatement.setString(1, "山田");
+                preparedStatement.setString(2, "太郎");
+                preparedStatement.setString(3, "yamada.taro@example.com");
                 preparedStatement.executeUpdate();
 
-                preparedStatement.setString(1, "Jane");
-                preparedStatement.setString(2, "Smith");
-                preparedStatement.setString(3, "jane.smith@example.com");
+                preparedStatement.setString(1, "佐藤");
+                preparedStatement.setString(2, "二郎");
+                preparedStatement.setString(3, "sato.jiro@example.com");
                 preparedStatement.executeUpdate();
+                preparedStatement.close();
+                
+                // テーブルのデータを取得するSQL文
+                String selectDataSQL = "SELECT * FROM employees";
+                
+                // SELECT文でPreparedStatementを作成
+                preparedStatement = connection.prepareStatement(selectDataSQL);
+                
+                // データ取得
+                resultSet = preparedStatement.executeQuery();
+                
+                // 一行ずつレコードを取得
+                while (resultSet.next()) {
+                	StringBuilder sb = new StringBuilder();
+                	sb.append("id: ")
+                	.append(resultSet.getString("id"))
+                	.append(", first_name: ")
+                	.append(resultSet.getString("first_name"))
+                	.append(", last_name: ")
+                	.append(resultSet.getString("last_name"))
+                	.append(", email: ")
+                	.append(resultSet.getString("email"))
+                	.toString();
+                	
+                	System.out.println(sb);
+                }
 
                 // 接続を閉じる
                 connection.close();
@@ -71,6 +100,12 @@ public class Sample4_01_1 {
             e.printStackTrace();
         } finally {
             try {
+            	if (resultSet != null) {
+            		resultSet.close();
+            	}
+            	if (preparedStatement != null) {
+            		preparedStatement.close();
+            	}
                 if (connection != null) {
                     connection.close();
                 }
